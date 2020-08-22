@@ -52,7 +52,7 @@ def lifegame(stdscr, height, width):
     # 世界の更新を行いつつ表示を行う
     elapsed = 0.0
     generation = 0
-    while True:
+    while generation < 200 :
         generation += 1
         print_world(stdscr, world, generation, elapsed)
         start_time = time.time()
@@ -60,6 +60,10 @@ def lifegame(stdscr, height, width):
         end_time = time.time()
         elapsed += end_time - start_time
         world, next_world = next_world, world
+    with open('cpu_result.txt', 'w') as f:
+        print("Height:%d, Width:%d" % (height, width), file=f)
+        print("Number of trials: %d" % generation, file=f)
+        print("mean_time: %f" % (elapsed / generation), file=f)
 
 def main(stdscr):
     stdscr.clear()
