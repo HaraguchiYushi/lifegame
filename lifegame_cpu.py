@@ -11,6 +11,13 @@ import time
 
 row2str = lambda row: ''.join(['O' if c != 0 else ' ' for c in row])
 cell_value = lambda world, height, width, y, x: world[y % height, x % width]
+death_cell_next_state = lambda num_live: 1 if num_live == 3 else 0
+life_cell_next_state = lambda num_live: 1 if num_live == 2 or num_live == 3 else 0
+cell_next_state = lambda current_value, num_live: death_cell_next_state(num_live) if current_value == 0 else life_cell_next_state(num_live)
+num_live_counter = lambda world, height, width, y, x: (   cell_value(world, height, width, y - 1, x - 1) + cell_value(world, height, width, y - 1, x)
+                                                        + cell_value(world, height, width, y - 1, x + 1) + cell_value(world, height, width, y, x - 1)
+                                                        + cell_value(world, height, width, y, x + 1)     + cell_value(world, height, width, y + 1, x - 1)
+                                                        + cell_value(world, height, width, y + 1, x)     + cell_value(world, height, width, y + 1, x + 1) )
 
 def print_world(stdscr, world, generation, elapsed):
     height, width = world.shape
@@ -23,27 +30,9 @@ def print_world(stdscr, world, generation, elapsed):
 def set_next_cell_value(world, next_world, height, width, y, x):
     current_value = cell_value(world, height, width, y, x)
     next_value = current_value
-    num_live = 0
-    num_live += cell_value(world, height, width, y - 1, x - 1)
-    num_live += cell_value(world, height, width, y - 1, x)
-    num_live += cell_value(world, height, width, y - 1, x + 1)
-    num_live += cell_value(world, height, width, y, x - 1)
-    num_live += cell_value(world, height, width, y, x + 1)
-    num_live += cell_value(world, height, width, y + 1, x - 1)
-    num_live += cell_value(world, height, width, y + 1, x)
-    num_live += cell_value(world, height, width, y + 1, x + 1)
-    if current_value == 0:
-        if num_live == 3:
-            next_world[y][x] = 1
-        else:
-            next_world[y][x] = 0
-    else:
-        if num_live <= 1:
-            next_world[y][x] = 0
-        elif num_live >= 4:
-            next_world[y][x] = 0
-        else:
-            next_world[y][x] = 1
+    #　隣接セルで生存しているセル数を確認する
+    num_live = num_live_counter(world, height, width, y, x)
+    next_world[y][x] = cell_next_state(current_value, num_live)
     
 
 def calc_next_world(world, next_wolrd):
