@@ -7,15 +7,17 @@ import numpy
 import curses
 from curses import wrapper
 import sys
+import time
 
 row2str = lambda row: ''.join(['O' if c != 0 else ' ' for c in row])
 cell_value = lambda world, height, width, y, x: world[y % height, x % width]
 
-def print_world(stdscr, world):
+def print_world(stdscr, world, generation, elapsed):
     height, width = world.shape
     for y in range(height):
         row = world[y]
         stdscr.addstr(y, 0, row2str(row))
+    stdscr.addstr(height, 0, "Generation: %06d, Elapsed: %.6f[sec]" % (generation, elapsed / generation))
     stdscr.refresh()
 
 def set_next_cell_value(world, next_world, height, width, y, x):
@@ -59,9 +61,15 @@ def lifegame(stdscr, height, width):
     next_world = numpy.empty((height, width), dtype=numpy.int32)
 
     # 世界の更新を行いつつ表示を行う
+    elapsed = 0.0
+    generation = 0
     while True:
-        print_world(stdscr, world)
+        generation += 1
+        print_world(stdscr, world, generation, elapsed)
+        start_time = time.time()
         calc_next_world(world, next_world)
+        end_time = time.time()
+        elapsed += end_time - start_time
         world, next_world = next_world, world
 
 def main(stdscr):
